@@ -1,0 +1,25 @@
+server {
+	listen 1005;
+	listen [::]:1005 default_server ipv6only=on;
+	server_name localhost;
+	root /srv/rezt/webroot/;
+	
+	client_max_body_size 20M;
+	charset UTF-8;
+
+    if ($request_method !~* GET) {
+        rewrite ^.*$ /serve.php;
+    }
+
+    location /serve.php {
+        alias /srv/rezt/serve.php;
+        fastcgi_pass unix:/var/run/php5-fpm.sock;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        fastcgi_index serve.php;
+        include fastcgi_params;
+    }
+
+	location / {
+		try_files $uri /asset/$uri $uri.html /serve.php;
+	}
+}
