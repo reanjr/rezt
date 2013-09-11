@@ -1,5 +1,6 @@
 <?php
 
+use RezT\Http\HttpHost;
 use RezT\Net\MediaType;
 use RezT\Resource\ResourceLoader;
 use RezT\Utility\Loader;
@@ -14,7 +15,7 @@ require_once __DIR__ . "/package/rezt/RezT/Utility/Loader.php";
 $resource = (new ResourceLoader())
     ->addResourcePath(__DIR__ . "/documentation")
     ->addExtensionHandler("md", "RezT\Markdown\MarkdownResource")
-    ->fetch($_SERVER["REQUEST_URI"]);
+    ->fetch(HttpHost::current()->getRequest()->getResourcePath());
 
 // if a matching resource was found, serve it
 if ($resource) {
@@ -26,6 +27,6 @@ if ($resource) {
 // otherwise, serve a 404
 else {
     http_response_code(404);
-    MediaType::send(MediaType::TEXT);
-    echo "Not Found";
+    MediaType::send(MediaType::HTML);
+    echo Michelf\Markdown::defaultTransform(file_get_contents("README.md"));
 }
