@@ -1,6 +1,7 @@
 <?php
 
 namespace RezT\Http;
+
 use RezT\Net\MediaType;
 
 /**
@@ -13,6 +14,7 @@ class HttpRequest extends HttpMessage {
     protected $resourcePath = null;
     protected $resourceQuery = null;
     protected $parsedQuery = null;
+    protected $protocol = null;
 
     /**
      * Create a request from the PHP globals and return the request object.
@@ -30,8 +32,9 @@ class HttpRequest extends HttpMessage {
         $method = $request->getHeader("x-http-method") ?: HttpMethod::fromGlobal();
         $request->setMethod($method);
 
-        // set the URI and raw body data
+        // set the URI, protocol, and raw body data
         $request->setResourceUri(self::getGlobalResourceUri());
+        $request->setProtocol(HttpProtocol::fromGlobal());
         $request->setBody(file_get_contents("php://input"));
 
         // return the request
@@ -68,10 +71,19 @@ class HttpRequest extends HttpMessage {
     /**
      * Return the resource URI identified by the PHP globals.
      *
-     * @return  string
+     * @return  string  Ex.: /path?query
      */
     public static function getGlobalResourceUri() {
         return $_SERVER["REQUEST_URI"];
+    }
+
+    /**
+     * Return the protocol identified by the PHP globals.
+     *
+     * @return  string  Ex.: HTTP/1.0
+     */
+    public static function getGlobalProtocol() {
+        return $_SERVER["SERVER_PROTOCOL"];
     }
 
     /**
@@ -174,6 +186,24 @@ class HttpRequest extends HttpMessage {
         return empty($name)
             ? $this->parsedQuery
             : $this->parsedQuery[(string)$name];
+    }
+
+    /**
+     * Set the protocol for the request.
+     *
+     * @param   string  $protocol
+     */
+    public function setProtocol($protocol) {
+        $this->protocol = (string)$protocol;
+    }
+
+    /**
+     * Return the protocol for the request.
+     *
+     * @return  string
+     */
+    public function getProtocol() {
+        return $this->protocol;
     }
 
     /**
