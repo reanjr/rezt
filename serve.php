@@ -35,6 +35,26 @@ require_once __DIR__ . "/package/rezt/RezT/Utility/Loader.php";
         $rsp->sendResource($res);
     })
 
+    // serve default RezT assets
+    ->addRoute("GET /", function(HttpRequest $req, HttpResponse $rsp, HttpRoute $route) {
+        $path = $route[0];
+        $res = (new ResourceLoader())
+            ->addResourcePath(__DIR__ . "/package/rezt-asset/asset")
+            ->addExtensionType("ico", MediaType::ICON)
+            ->addExtensionType("txt", MediaType::TEXT)
+            ->fetch($path);
+
+        if (empty($res))
+            return $router->error($req, $rsp, HttpStatus::NOT_FOUND);
+
+        $rsp->sendResource($res);
+    })
+
+    // send 404 for all unmatched routes
+    ->addRoute("* /", function(HttpRequest $req, HttpResponse $rsp, HttpRoute $route, HttpRouter $router) {
+        $router->error($req, $rsp, HttpStatus::NOT_FOUND);
+    })
+
     // handle 404 errors
     ->addRoute("error 404", function(HttpRequest $req, HttpResponse $rsp) {
         // fetch README
@@ -53,11 +73,6 @@ require_once __DIR__ . "/package/rezt/RezT/Utility/Loader.php";
         $rsp->setMediaType(MediaType::TEXT);
         $rsp->setBody(HttpStatus::getMessage(HttpStatus::INTERNAL_SERVER_ERROR));
         $rsp->send();
-    })
-
-    // send 404 for all unmatched routes
-    ->addRoute("* /", function(HttpRequest $req, HttpResponse $rsp, HttpRoute $route, HttpRouter $router) {
-        $router->error($req, $rsp, HttpStatus::NOT_FOUND);
     })
 
     // route the host request

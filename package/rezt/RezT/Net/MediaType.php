@@ -11,6 +11,7 @@ class MediaType {
     const CSS = "text/css";
     const FORM = "application/x-www-form-urlencoded";
     const HTML = "text/html";
+    const ICON = "image/x-icon";
     const JS = "text/javascript";
     const JSON = "application/json";
     const MIXED = "multipart/mixed";
