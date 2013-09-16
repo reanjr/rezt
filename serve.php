@@ -37,7 +37,7 @@ require_once __DIR__ . "/package/rezt/RezT/Utility/Loader.php";
     })
 
     // serve default RezT assets
-    ->addRoute("GET /", function(HttpRequest $req, HttpResponse $rsp, HttpRoute $route) {
+    ->addRoute("GET /", function(HttpRequest $req, HttpResponse $rsp, HttpRoute $route, HttpRouter $router) {
         $path = $route[0];
         $res = (new ResourceLoader())
             ->addResourcePath(__DIR__ . "/package/rezt-asset/asset")
