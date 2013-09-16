@@ -147,7 +147,7 @@ class ResourceLoader {
      * @return  string
      */
     public function getExtensionType($extension) {
-        return $this->extensionTypes[$extension];
+        return @$this->extensionTypes[$extension];
     }
 
     /**
@@ -200,7 +200,7 @@ class ResourceLoader {
      * @return  string
      */
     public function getExtensionHandler($extension) {
-        return $this->extensionHandlers[$extension];
+        return @$this->extensionHandlers[$extension];
     }
 
     /**
