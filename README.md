@@ -18,6 +18,6 @@ to localhost on port 1005.  It assumes RezT is installed to /srv/rezt.  If you
 installed rezt somewhere other than /srv/rezt, you'll have to change a few paths
 to get this working.
 
-Once you have RezT installed and you web server configured, you should be able
-to navigate to <http://localhost:1005/welcome> to see a welcome page and some
-next steps.
+Once you have RezT installed and your web server configured, you should be able
+to navigate to <http://localhost:1005/doc/welcome> to see a welcome page and
+some next steps.
