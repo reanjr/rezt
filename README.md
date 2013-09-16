@@ -1,6 +1,12 @@
 RezT
 ====
-The RezT application framework for PHP.  Not for the faint of heart.
+The RezT application framework for PHP.  RezT is built on PHP 5.4 and takes
+advantage of some of the more recent features introduced to PHP.  RezT is built
+with the idea that you might already have a large and complex code base or a
+strong opinion on how your application is structured.  It tries to not make
+decisions for you, but to offer sane defaults and best practices.  The target
+audience are experienced PHP developers who might build their own framework
+if they had the time.
 
 Installation
 ------------
