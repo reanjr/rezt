@@ -209,7 +209,7 @@ class HttpRoute implements ArrayAccess, IteratorAggregate  {
         // empty path rule matches the root path "/"
         if ($pathRule == "") {
             $this->testPathFunction = function(HttpRequest $request) use($route) {
-                return $request->getResourceUri() == "/";
+                return $request->getUri() == "/";
             };
             return;
         }
@@ -249,7 +249,7 @@ class HttpRoute implements ArrayAccess, IteratorAggregate  {
         // build full pattern and set path test function
         $pattern = implode("/", $patterns);
         $this->testPathFunction = function(HttpRequest $request) use($pattern, $route) {
-            $uri = $request->getResourceUri();
+            $uri = $request->getUri();
 
             // reject anything with a segment beginning in "."
             if (preg_match("@/\.@", $uri))

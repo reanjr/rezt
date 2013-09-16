@@ -10,9 +10,10 @@ use RezT\Net\MediaType;
 class HttpRequest extends HttpMessage {
 
     protected $method = null;
-    protected $resourceUri = null;
+    protected $uri = null;
+    protected $path = null;
+    protected $query = null;
     protected $resourcePath = null;
-    protected $resourceQuery = null;
     protected $parsedQuery = null;
     protected $protocol = null;
 
@@ -33,7 +34,7 @@ class HttpRequest extends HttpMessage {
         $request->setMethod($method);
 
         // set the URI, protocol, and raw body data
-        $request->setResourceUri(self::getGlobalResourceUri());
+        $request->setUri(self::getGlobalRequestUri());
         $request->setProtocol(HttpProtocol::fromGlobal());
         $request->setBody(file_get_contents("php://input"));
 
@@ -69,11 +70,11 @@ class HttpRequest extends HttpMessage {
     }
 
     /**
-     * Return the resource URI identified by the PHP globals.
+     * Return the request URI identified by the PHP globals.
      *
      * @return  string  Ex.: /path?query
      */
-    public static function getGlobalResourceUri() {
+    public static function getGlobalRequestUri() {
         return $_SERVER["REQUEST_URI"];
     }
 
@@ -105,66 +106,69 @@ class HttpRequest extends HttpMessage {
     }
 
     /**
-     * Set the resource URI for the request.
+     * Set the URI for the request.
      *
-     * @param   string  $resourceUri
+     * @param   string  $uri
      */
-    public function setResourceUri($resourceUri) {
-        $this->resourceUri = (string)$resourceUri;
-        $this->resourcePath = parse_url($resourceUri, PHP_URL_PATH);
-        $this->resourceQuery = parse_url($resourceUri, PHP_URL_QUERY);
-    }
-
-    /**
-     * Return the resource URI for the request.
-     *
-     * @return  string
-     */
-    public function getResourceUri() {
-        return $this->resourceUri;
-    }
-
-    /**
-     * Set the resource path for the request.
-     *
-     * @param   string  $resourcePath
-     */
-    public function setResourcePath($resourcePath) {
-        $this->resourcePath = (string)$resourcePath;
-        $this->resourceUri = $this->resourcePath;
-        if (!empty($this->resourceQuery))
-            $this->resourceUri .= "?" . $this->resourceQuery;
-    }
-
-    /**
-     * Return the resource path for the request.
-     *
-     * @return  string
-     */
-    public function getResourcePath() {
-        return $this->resourcePath;
-    }
-
-    /**
-     * Set the resource query for the request.
-     *
-     * @param   string  $query
-     */
-    public function setResourceQuery($query) {
-        $this->resourceQuery = (string)$query;
-        $this->resourceUri = $this->resourcePath;
-        if (!empty($this->resourceQuery))
-            $this->resourceUri .= "?" . $this->resourceQuery;
+    public function setUri($uri) {
+        $this->uri = (string)$uri;
+        $this->path = parse_url($uri, PHP_URL_PATH);
+        $this->query = parse_url($uri, PHP_URL_QUERY);
+        $this->resourcePath = $this->path;
         $this->parsedQuery = null;
     }
 
     /**
-     * Return the resource query for the request.
+     * Return the URI for the request.
      *
      * @return  string
      */
-    public function getResourceQuery() {
-        return $this->resourceQuery;
+    public function getUri() {
+        return $this->uri;
+    }
+
+    /**
+     * Set the path for the request.
+     *
+     * @param   string  $path
+     */
+    public function setPath($path) {
+        $this->path = (string)$path;
+        $this->uri = $this->path;
+        $this->resourcePath = $this->path;
+        if (!empty($this->query))
+            $this->uri .= "?" . $this->query;
+    }
+
+    /**
+     * Return the path for the request.
+     *
+     * @return  string
+     */
+    public function getPath() {
+        return $this->path;
+    }
+
+    /**
+     * Set the query for the request.
+     *
+     * @param   string  $query
+     */
+    public function setQuery($query) {
+        $this->query = (string)$query;
+        $this->uri = $this->path;
+        if (!empty($this->query))
+            $this->uri .= "?" . $this->query;
+        $this->parsedQuery = null;
+    }
+
+    /**
+     * Return the query for the request.
+     *
+     * @return  string
+     */
+    public function getQuery() {
+        return $this->query;
     }
 
     /**
@@ -179,13 +183,43 @@ class HttpRequest extends HttpMessage {
         // parse and cache query data
         if (is_null($this->parsedQuery)) {
             $this->parsedQuery = [];
-            $query = $this->getResourceQuery();
+            $query = $this->getQuery();
             parse_str($query, $this->parsedQuery);
         }
 
         return empty($name)
             ? $this->parsedQuery
             : $this->parsedQuery[(string)$name];
+    }
+
+    /**
+     * Set the resource path for the request.  This may not match the original
+     * path returned by getPath.  The resource path may be rewritten during
+     * routing.
+     *
+     * @param   string  $resourcePath
+     */
+    public function setResourcePath($resourcePath) {
+        $this->resourcePath = (string)$resourcePath;
+    }
+
+    /**
+     * Return the resource path for the request.
+     *
+     * @return  string
+     */
+    public function getResourcePath() {
+        return $this->resourcePath;
+    }
+
+    /**
+     * Return the resource path with the leading slash stripped.  This should be
+     * used when a relative path is needed for constructing paths.
+     *
+     * @return  string
+     */
+    public function getRelativeResourcePath() {
+        return ltrim($this->getResourcePath(), "/");
     }
 
     /**

@@ -1,5 +1,6 @@
 <?php
 
+use RezT\Application\ReztDocsApplication;
 use RezT\Http\HttpHost;
 use RezT\Http\HttpRequest;
 use RezT\Http\HttpResponse;
@@ -16,6 +17,7 @@ require_once __DIR__ . "/package/rezt/RezT/Utility/Loader.php";
 (new Loader(__DIR__ . "/package/rezt"))->register();
 (new Loader(__DIR__ . "/package/markdown"))->register();
 (new Loader(__DIR__ . "/package/rezt-markdown"))->register();
+(new Loader(__DIR__ . "/package/rezt-docs"))->register();
 
 // setup router
 (new HttpRouter())
@@ -23,18 +25,7 @@ require_once __DIR__ . "/package/rezt/RezT/Utility/Loader.php";
     ->addRoute("GET", HttpRedirect::temporary("/doc/welcome"))
 
     // serve documentation at /doc
-    ->addRoute("GET /doc/", function(HttpRequest $req, HttpResponse $rsp, HttpRoute $route, HttpRouter $router) {
-        $path = $route[0];
-        $res = (new ResourceLoader())
-            ->addResourcePath(__DIR__ . "/documentation")
-            ->addExtensionHandler("md", "RezT\Markdown\MarkdownResource")
-            ->fetch($path);
-
-        if (empty($res))
-            return $router->error($req, $rsp, HttpStatus::NOT_FOUND);
-
-        $rsp->sendResource($res);
-    })
+    ->addRoute("* /doc/", new ReztDocsApplication(__DIR__ . "/documentation"))
 
     // serve default RezT assets
     ->addRoute("GET /", function(HttpRequest $req, HttpResponse $rsp, HttpRoute $route, HttpRouter $router) {
