@@ -6,7 +6,7 @@ with the idea that you might already have a large and complex code base or a
 strong opinion on how your application is structured.  It tries to not make
 decisions for you, but to offer sane defaults and best practices.  The target
 audience are experienced PHP developers who might build their own framework
-if they had the time.
+if they had the time and inclination.
 
 Installation
 ------------
@@ -27,3 +27,10 @@ to get this working.
 Once you have RezT installed and your web server configured, you should be able
 to navigate to <http://localhost:1005/doc/welcome> to see a welcome page and
 some next steps.
+
+Contributions
+-------------
+RezT makes use of assets from [IcoMoon](http://icomoon.io/).
+
+RezT makes use of Michel Fortin's
+[PHP Markdown](http://michelf.ca/projects/php-markdown/) implementation.
