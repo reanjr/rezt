@@ -17,6 +17,7 @@ require_once __DIR__ . "/package/rezt/RezT/Utility/Loader.php";
 (new Loader(__DIR__ . "/package/markdown"))->register();
 (new Loader(__DIR__ . "/package/rezt-markdown"))->register();
 
+// setup router
 (new HttpRouter())
     // redirect the homepage to the documentation
     ->addRoute("GET", HttpRedirect::temporary("/doc/welcome"))
