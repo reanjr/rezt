@@ -1,4 +1,4 @@
-rezt
+RezT
 ====
 The RezT application framework for PHP.  Not for the faint of heart.
 
