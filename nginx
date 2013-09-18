@@ -20,6 +20,6 @@ server {
     }
 
     location / {
-        try_files $uri /asset/$uri $uri.html /serve.php;
+        try_files $uri $uri.html /serve.php;
     }
 }
