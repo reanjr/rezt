@@ -59,9 +59,9 @@ requests should always pass through RezT.
         rewrite ^.*$ /serve.php;
     }
 
-All other RezT requests go through the front controller.  This file is not
-located in the web root, so an alias is needed to map this to a URL.  In
-addition, FastCGI params are needed so the PHP script can read the request.
+All other RezT requests go through the front controller.  This file is not located
+in the web root, so an alias is needed to map this to a URL.  In addition, FastCGI
+params are needed so the PHP script can read the request.
 
     location /serve.php {
         alias /srv/rezt/serve.php;
@@ -71,17 +71,17 @@ addition, FastCGI params are needed so the PHP script can read the request.
         include fastcgi_params;
     }
 
-For URI /foo, the server should try in the following order to find a resource
-to serve: "/foo", "/asset/foo", "/foo.html".  If none can be found, the
-request will be sent to the RezT front controller.
+For URI /foo, the server should try to find a resource named "/foo" or one named
+"/foo.html".  If none can be found, the request will be sent to the RezT front
+controller.
 
     location / {
         try_files $uri /asset/$uri $uri.html /serve.php;
     }
 
-Once you have RezT installed and your web server configured, you should be able
-to navigate to <http://localhost:1005/doc/welcome> to see a welcome page and
-some next steps.
+Once you have RezT installed and your web server configured, you should be able to
+navigate to <http://localhost:1005/doc/welcome> to see a welcome page and some next
+steps.
 
 Contributions
 -------------
