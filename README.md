@@ -10,19 +10,23 @@ if they had the time and inclination.
 
 Installation
 ------------
-The first step to install RezT is to clone the repo from github.  For example,
-to install RezT to /srv/rezt:
+The first step to install RezT is to decide where you want to install it.  The
+default configuration assumes you are installing to /srv/rezt.
 
-    git clone git@github.com:reanjr/rezt.git /srv/rezt
+    REZT_ROOT=/srv/rezt
 
-Next, configure your web server to use /srv/rezt/webroot as the the primary
+After you've decided where you want to install, clone the repo from github.
+
+    git clone git@github.com:reanjr/rezt.git $REZT_ROOT
+
+Next, configure your web server to use $REZT_ROOT/webroot as the the primary
 place to serve resources from.  Then add a fallback so that all other requests
-that are not found in the webroot are handled by /srv/rezt/serve.php.  An
+that are not found in the webroot are handled by $REZT_ROOT/serve.php.  An
 example nginx configuration that meets these requirements can be found in the
-RezT directory.  It is configured for development and will listen for requests
-to localhost on port 1005.  It assumes RezT is installed to /srv/rezt.  If you
-installed rezt somewhere other than /srv/rezt, you'll have to change a few paths
-to get this working.
+$REZT_ROOT directory.  It is configured for development and will listen for
+requests to localhost on port 1005.  It assumes RezT is installed to /srv/rezt.
+If you installed rezt somewhere other than /srv/rezt, you'll have to change a
+few paths to get this working.
 
 Once you have RezT installed and your web server configured, you should be able
 to navigate to <http://localhost:1005/doc/welcome> to see a welcome page and
