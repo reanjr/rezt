@@ -46,7 +46,7 @@ class ReztDocsApplication extends HttpApplication {
     protected function handleRequest(HttpRequest $request,
         HttpResponse $response, HttpRoute $route, HttpRouter $router ) {
 
-        $appRouter = new HttpRouter();
+        $appRouter = new HttpRouter($router);
 
         // serve static assets from /static
         $staticLoader = (new ResourceLoader())
