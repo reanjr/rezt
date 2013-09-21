@@ -5,6 +5,7 @@ namespace RezT\Http\Routing;
 use RezT\Http\HttpHost;
 use RezT\Http\HttpRequest;
 use RezT\Http\HttpResponse;
+use RezT\Http\HttpStatus;
 use RuntimeException;
 
 /**
@@ -12,9 +13,21 @@ use RuntimeException;
  */
 class HttpRouter {
 
+    protected $fallbackRouter = null;
     protected $routes = [];
 
     private $pathOnlyMatch = false;
+    private $next = 0;
+
+    /**
+     * Set the fallback router to use if this router cannot match a route.
+     *
+     * @param   \RezT\Http\Routing\HttpRouter   $fallbackRouter
+     */
+    public function __construct(HttpRouter $fallbackRouter = null) {
+        if ($fallbackRouter)
+            $this->setFallbackRouter($fallbackRouter);
+    }
 
     /**
      * Route the request and call the matching handler.  Throw an exception if
@@ -26,6 +39,24 @@ class HttpRouter {
     public function __invoke(HttpRequest $request, HttpResponse $response) {
         if (!$this->route($request, $response))
             throw new RuntimeException("no matching route");
+    }
+
+    /**
+     * Set the fallback router to use if this router cannot match a route.
+     *
+     * @param   \RezT\Http\Routing\HttpRouter   $fallbackRouter
+     */
+    public function setFallbackRouter(HttpRouter $fallbackRouter) {
+        $this->fallbackRouter = $fallbackRouter;
+    }
+
+    /**
+     * Return the fallback router to use if this router cannot match a route.
+     *
+     * @return  \RezT\Http\Routing\HttpRouter
+     */
+    public function getFallbackRouter() {
+        return $this->fallbackRouter;
     }
 
     /**
@@ -46,13 +77,12 @@ class HttpRouter {
     }
 
     /**
-     * Route and handle the request.  Return false if no matching route was
-     * found.  If no response is provided, an empty response will be created.
-     * If no request is provided, the global PHP request will be used.
+     * Route and handle the request.  Throw an exception if no matching route
+     * was found.  If no response is provided, an empty response will be
+     * created. If no request is provided, the global PHP request will be used.
      *
      * @param   \RezT\Http\HttpRequest  $request
      * @param   \RezT\Http\HttpResponse $response
-     * @return  boolean
      */
     public function route(HttpRequest $request = null,
         HttpResponse $response = null) {
@@ -66,45 +96,65 @@ class HttpRouter {
         }
 
         try {
+            // this will be flagged if route has matching path but not method
             $this->pathOnlyMatch = false;
-            foreach ($this->routes as $route) {
+
+            // check for matching request handler
+            while ($route = $this->nextRoute()) {
                 $result = 0;
                 if ($route->matches($request, $result)) {
                     $handler = $route->getHandler();
-
-                    if (!is_callable($handler))
-                        return false;
-
-                    $handler($request, $response, $route, $this);
-                    return true;
-                }
-
-                else {
+                    break;
+                } else {
                     $pathMatch = ($result == HttpRoute::RESULT_PATH_MATCH);
                     $this->pathOnlyMatch = $this->pathOnlyMatch || $pathMatch;
                 }
             }
+
+            // execute handler if one was found
+            if ($handler) {
+                $handler($request, $response, $route, $this);
+            }
+
+            // use fallback router if available
+            elseif ($this->getFallbackRouter()) {
+                $this->getFallbackRouter()->route($request, $response);
+            }
+
+            // no request handler; trigger a NOT FOUND
+            else {
+                $this->error($request, $response, HttpStatus::NOT_FOUND);
+            }
         } catch (Exception $e) {
+            // check for matching exception handler
+            $handler = null;
             foreach ($this->routes as $route) {
                 if ($route->matches($e)) {
                     $handler = $route->getHandler();
-
-                    if (!is_callable($handler)) {
-                        throw $e;
-                    }
-
-                    $handler($request, $response, $e);
-                    return true;
+                    break;
                 }
             }
-        }
 
-        return false;
+            // execute handler if one was found
+            if ($handler) {
+                $handler($request, $response, $e);
+            }
+
+            // use fallback router if available
+            elseif ($this->getFallbackRouter()) {
+                $this->getFallbackRouter()->exception($request, $response, $e);
+            }
+
+            // no exception handler; re-throw
+            else {
+                throw $e;
+            }
+        }
     }
 
     /**
-     * Route an error response to the appropriate handler.  Throw an exception
-     * if there is no appropriate handler.
+     * Trigger an error handler.  Throw an exception if there is no appropriate
+     * handler.
      *
      * @param   \RezT\Http\HttpRequest  $request
      * @param   \RezT\Http\HttpResponse $response
@@ -112,20 +162,49 @@ class HttpRouter {
      */
     public function error(HttpRequest $request, HttpResponse $response,
         $httpStatus) {
-        
+
+        // try additional routes if this is a NOT FOUND
+        $routesExhausted = ($this->next == 0);
+        if ($httpStatus == HttpStatus::NOT_FOUND && !$routesExhausted) {
+            $this->route($request, $response);
+            return;
+        }
+
+        // try to find a matching error route handler
         foreach ($this->routes as $route) {
             if ($route->matches($httpStatus)) {
                 $handler = $route->getHandler();
-                break;
+                $handler($request, $response, $httpStatus);
+                return;
             }
         }
 
-        if (!is_callable($handler)) {
-            throw new Exception("no handler for status $httpStatus");
+        // no handler, throw an exception
+        $status = HttpStatus::getMessage($httpStatus) ?: $httpStatus;
+        throw new RuntimeException("no handler for error $status");
+    }
+
+    /**
+     * Trigger an exception handler.  Throw the exception if there is no
+     * appropriate handler.
+     *
+     * @param   \RezT\Http\HttpRequest  $request
+     * @param   \RezT\Http\HttpResponse $response
+     * @param   Exception               $e
+     */
+    public function exception(HttpRequest $request, HttpResponse $response,
+        Exception $e) {
+
+        // try to find a matching route handler
+        foreach ($this->routes as $route) {
+            if ($route->matches($e)) {
+                $handler = $route->getHandler();
+                return $handler($request, $response, $e);
+            }
         }
 
-        $handler($request, $response, $httpStatus);
-        return true;
+        // no handler; throw the exception
+        throw $e;
     }
 
     /**
@@ -137,6 +216,22 @@ class HttpRouter {
      */
     public function skippedPathOnlyMatch() {
         return $this->pathOnlyMatch;
+    }
+
+    /**
+     * Return the next route, and advance index to the following route.
+     *
+     * @return  \RezT\Http\Routing\HttpRoute
+     */
+    protected function nextRoute() {
+        if ($this->next >= count($this->routes)) {
+            $this->next = 0;
+            return null;
+        }
+
+        $route = $this->routes[$this->next];
+        $this->next++;
+        return $route;
     }
 
 }
