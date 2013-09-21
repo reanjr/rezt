@@ -43,7 +43,7 @@ class ResourceApplication extends HttpApplication {
         if (empty($resource))
             return $router->error($request, $response, HttpStatus::NOT_FOUND);
 
-        $response->sendResource($resource);
+        $response->sendResource($resource, $request);
     }
 
     /**

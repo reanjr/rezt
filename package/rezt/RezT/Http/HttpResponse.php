@@ -47,17 +47,36 @@ class HttpResponse extends HttpMessage {
     }
 
     /**
-     * Send a resource to the client.
+     * Send a resource to the client.  Provide the client request to enable
+     * cache control.
      *
      * @param   \RezT\Resource\Resource $resource
+     * @param   \RezT\Http\HttpRequest  $request
      */
-    public function sendResource(Resource $resource) {
+    public function sendResource(Resource $resource,
+        HttpRequest $request = null) {
+
+        // if the resource has a tag, set a header for it
+        $resourceTag = $resource->getIdentifier();
+        if ($resourceTag)
+            $this->setHeader("ETag", $resourceTag);
+
+        // if there's a request, see if client has up to date version already
+        if (!empty($request)) {
+            $clientTag = $request->getHeader("If-None-Match");
+
+            // if tags match, set status to NOT MODIFIED
+            if ($clientTag == $resourceTag) {
+                $this->setStatus(HttpStatus::NOT_MODIFIED);
+            }
+        }
+
         // send the resource media type if available
         if ($resource->getMediaType()) {
             MediaType::send($resource->getMediaType());
         }
 
-        // evalute resource body first for chance to set media type, et al
+        // evaluate resource body first for chance to set media type, et al
         $body = (string)$resource;
 
         // send headers
@@ -65,8 +84,9 @@ class HttpResponse extends HttpMessage {
         $this->sendHeaders();
         $this->sendMediaType();
 
-        // send body
-        echo $body;
+        // send body unless resource was not modified
+        if ($this->getStatus() != HttpStatus::NOT_MODIFIED)
+            echo $body;
     }
 
     /**

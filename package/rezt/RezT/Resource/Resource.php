@@ -93,4 +93,20 @@ class Resource {
         return $this->loader;
     }
 
+    /**
+     * Return a value that can uniquely identify this resource, including its
+     * current contents.  Return null if there is no way to identify the
+     * resource in this manner.
+     *
+     * @return  string
+     */
+    public function getIdentifier() {
+        $resourceFile = $this->getResourceFile();
+        if (file_exists($resourceFile)) {
+            $time = filemtime($resourceFile);
+            $hash = md5_file($resourceFile);
+            return sha1($resourceFile.$time.$hash);
+        }
+    }
+
 }
