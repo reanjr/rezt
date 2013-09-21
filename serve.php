@@ -9,6 +9,7 @@ use RezT\Http\Routing\HttpRouter;
 use RezT\Http\Routing\HttpRoute;
 use RezT\Http\Routing\HttpRedirect;
 use RezT\Net\MediaType;
+use RezT\Resource\ResourceApplication;
 use RezT\Resource\ResourceLoader;
 use RezT\Utility\Loader;
 
@@ -26,22 +27,14 @@ require_once __DIR__ . "/package/rezt/RezT/Utility/Loader.php";
     ->addRoute("GET", HttpRedirect::temporary("/doc/welcome"))
 
     // serve documentation at /doc
-    ->addRoute("* /doc/", new ReztDocsApplication(__DIR__ . "/documentation"))
+    ->addRoute("GET /doc/", new ReztDocsApplication(__DIR__ . "/documentation"))
 
-    // serve default RezT assets
-    ->addRoute("GET /", function(HttpRequest $req, HttpResponse $rsp, HttpRoute $route, HttpRouter $router) {
-        $path = $route[0];
-        $res = (new ResourceLoader())
-            ->addResourcePath(__DIR__ . "/package/rezt-asset/asset")
-            ->addExtensionType("ico", MediaType::ICON)
-            ->addExtensionType("txt", MediaType::TEXT)
-            ->fetch($path);
-
-        if (empty($res))
-            return $router->error($req, $rsp, HttpStatus::NOT_FOUND);
-
-        $rsp->sendResource($res);
-    })
+    // use RezT assets until more permanent ones are available
+    ->addRoute("GET /", new ResourceApplication((new ResourceLoader())
+        ->addResourcePath(__DIR__ . "/package/rezt-asset/asset")
+        ->addExtensionType("ico", MediaType::ICON)
+        ->addExtensionType("txt", MediaType::TEXT)
+    ))
 
     // send 404 for all unmatched routes
     ->addRoute("* /", function(HttpRequest $req, HttpResponse $rsp, HttpRoute $route, HttpRouter $router) {
