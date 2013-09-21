@@ -23,6 +23,8 @@ Next, configure your web server.  An example nginx configuration can be found in
 the $REZT_ROOT directory.  You will likely have to adjust this to meet your
 needs.
 
+### Nginx Configuration
+
 The server block contains your configuration.
 
     server { ... }
