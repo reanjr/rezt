@@ -91,3 +91,6 @@ RezT makes use of assets from [IcoMoon](http://icomoon.io/).
 
 RezT makes use of Michel Fortin's
 [PHP Markdown](http://michelf.ca/projects/php-markdown/) implementation.
+
+RezT makes use of Ivan Sagalaev's
+[highlight.js](http://softwaremaniacs.org/soft/highlight/en/) syntax highlighting.
