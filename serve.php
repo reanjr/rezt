@@ -17,6 +17,7 @@ require_once __DIR__ . "/package/rezt/RezT/Utility/Loader.php";
 (new Loader(__DIR__ . "/package/rezt"))->register();
 (new Loader(__DIR__ . "/package/markdown"))->register();
 (new Loader(__DIR__ . "/package/rezt-markdown"))->register();
+(new Loader(__DIR__ . "/package/rezt-template"))->register();
 (new Loader(__DIR__ . "/package/rezt-docs"))->register();
 
 // setup router

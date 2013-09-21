@@ -15,6 +15,7 @@ use RezT\Http\Routing\HttpRouter;
 abstract class HttpApplication extends HttpHost {
 
     protected $acceptableMethods = [];
+    protected $baseUri = null;
 
     /**
      * Initialize with an empty request.
@@ -119,6 +120,24 @@ abstract class HttpApplication extends HttpHost {
         return (empty($methods))
             ? true
             : in_array(strtoupper($request->getMethod()), $methods);
+    }
+
+    /**
+     * Set the base URI for this application.
+     *
+     * @param   string  $baseUri
+     */
+    public function setBaseUri($baseUri) {
+        $this->baseUri = (string)$baseUri;
+    }
+
+    /**
+     * Return the base URI for this application.
+     *
+     * @return  string
+     */
+    public function getBaseUri() {
+        return $this->baseUri;
     }
 
 }

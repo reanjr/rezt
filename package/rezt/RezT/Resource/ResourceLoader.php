@@ -6,9 +6,11 @@ namespace RezT\Resource;
  * Load resources from the file system.
  */
 class ResourceLoader {
+
     protected $extensionTypes = [];
     protected $extensionHandlers = [];
     protected $resourcePaths = [];
+    protected $transforms = [];
 
     /**
      * Find the specified resource and return a resource object.  Return null
@@ -35,7 +37,7 @@ class ResourceLoader {
         $resource = new $resourceClass($resourceFile);
         $resource->setLoader($this);
         if ($type) $resource->setMediaType($type);
-        return $resource;
+        return $this->transform($resource);
     }
 
     /**
@@ -254,6 +256,31 @@ class ResourceLoader {
      */
     public function getResousourcePaths() {
         return array_values($this->resourcePaths);
+    }
+
+    /**
+     * Add a resource transformation.  Transformations are chained in the order
+     * they are added.  Return this instance for chaining.
+     *
+     * @param   callable                        $transform
+     * @return  \RezT\Resource\ResourceLoader
+     */
+    public function addTransform($transform) {
+        $this->transforms[] = $transform;
+        return $this;
+    }
+
+    /**
+     * Execute all of the added transformations on the resource.
+     *
+     * @param   \RezT\Resource\Resource $resource
+     * @return  \RezT\Resource\Resource
+     */
+    public function transform(Resource $resource) {
+        foreach ($this->transforms as $transform) {
+            $resource = $transform($resource);
+        }
+        return $resource;
     }
 
 }
