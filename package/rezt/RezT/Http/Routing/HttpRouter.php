@@ -127,7 +127,6 @@ class HttpRouter {
             }
         } catch (Exception $e) {
             // check for matching exception handler
-            $handler = null;
             foreach ($this->routes as $route) {
                 if ($route->matches($e)) {
                     $handler = $route->getHandler();
@@ -136,7 +135,7 @@ class HttpRouter {
             }
 
             // execute handler if one was found
-            if ($handler) {
+            if (!empty($handler)) {
                 $handler($request, $response, $e);
             }
 
