@@ -350,8 +350,8 @@ class HttpRoute implements ArrayAccess, IteratorAggregate  {
     /**
      * Set the forwarder for this route.  Return this instance for chaining.
      *
-     * @param   \Http\Routing\HttpRoute $forwarder
-     * @return  \Http\Routing\HttpRoute
+     * @param   \RezT\Http\Routing\HttpRoute $forwarder
+     * @return  \RezT\Http\Routing\HttpRoute
      */
     public function setForwarder(HttpRoute $forwarder) {
         $this->forwarder = $forwarder;
@@ -361,7 +361,7 @@ class HttpRoute implements ArrayAccess, IteratorAggregate  {
     /**
      * Return the forwarder for this route.
      *
-     * @return  \Http\Routing\HttpRoute
+     * @return  \RezT\Http\Routing\HttpRoute
      */
     public function getForwarder() {
         return $this->forwarder;
