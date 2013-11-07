@@ -6,10 +6,10 @@ with the idea that you might already have a large and complex code base or a
 strong opinion on how your application is structured.  It tries to not make
 decisions for you, but to offer sane defaults and best practices.
 
-One of the primary goals of RezT is to function well within an IDE.  The target
-audience are experienced PHP developers who use an IDE and might be unhappy
-with the amount of "magic" that happens in some frameworks which the IDE cannot
-understand.
+RezT design goals
+ - limit __magic
+ - operate silently with E\_NOTICE and E\_STRICT enabled
+ - work well in an IDE
 
 Installation
 ------------
